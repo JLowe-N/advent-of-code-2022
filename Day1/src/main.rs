@@ -8,15 +8,21 @@ fn get_input(file_path: &str) {
     println!("With text:\n{}", contents);
 }
 
-fn parse_config(args: &[String]) -> &str {
-    let file_path = &args[1];
-
-    return file_path;
-}
-
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let file_path = parse_config(&args);
+    let config = Config::new(&args);
     println!("Hello, world!");
-    get_input(&file_path);
+    get_input(&config.file_path);
+}
+
+struct Config {
+    file_path: String,
+}
+
+impl Config {
+    fn new(args: &[String]) -> Config {
+        let file_path = args[1].clone();
+
+        Config { file_path }
+    }
 }
