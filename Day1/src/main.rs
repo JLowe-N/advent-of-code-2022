@@ -1,12 +1,15 @@
 use std::env;
+use std::error::Error;
 use std::fs;
 use std::process;
 
-fn get_input(file_path: &str) {
+fn get_input(file_path: &str) -> Result<(), Box<dyn Error>> {
     println!("In file {}", file_path);
 
-    let contents = fs::read_to_string(file_path).expect("Should have read file");
+    let contents = fs::read_to_string(file_path)?;
     println!("With text:\n{}", contents);
+
+    Ok(())
 }
 
 fn main() {
@@ -16,8 +19,20 @@ fn main() {
         println!("Program parsing arguments: {}", err);
         process::exit(1);
     });
+
+    if let Err(e) = run(config) {
+        println!("Application error: {}", e);
+        process::exit(1);
+    }
+}
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
     println!("Hello, world!");
-    get_input(&config.file_path);
+    if let Err(e) = get_input(&config.file_path) {
+        println!("Application error: {}", e);
+    }
+
+    Ok(())
 }
 
 struct Config {
