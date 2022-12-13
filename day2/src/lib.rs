@@ -8,7 +8,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         println!("Application error: {}", err);
         process::exit(1)
     });
-    let rounds = score_rounds(input);
+    score_rounds_part2(input);
 
     Ok(())
 }
@@ -57,45 +57,40 @@ pub fn score_rounds(rounds: String) -> () {
     )
 }
 
-pub fn find_max_sum(input: Vec<Vec<i32>>) -> i32 {
-    let mut max_sum = 0;
-    for elf_foods in input.iter() {
-        let mut current_sum = 0;
-        for food_calories in elf_foods.iter() {
-            current_sum += food_calories;
+pub fn score_rounds_part2(rounds: String) -> () {
+    let mut player_abc_score = 0;
+    let mut player_xyz_score = 0;
+    const WIN_VALUE: u32 = 6;
+    const TIE_VALUE: u32 = 3;
+    const LOSS_VALUE: u32 = 0;
+    let play_value: HashMap<&str, u32> = HashMap::from([("A", 1), ("B", 2), ("C", 3)]);
+    let xyz_wins = HashMap::from([("A", "B"), ("B", "C"), ("C", "A")]);
+    let xyz_loses = HashMap::from([("A", "C"), ("B", "A"), ("C", "B")]);
+    let xyz_play_result = HashMap::from([("X", "lose"), ("Y", "tie"), ("Z", "win")]);
+    for round in rounds.lines() {
+        let plays: Vec<&str> = round.split(" ").collect();
+        player_abc_score += play_value[plays[0]];
+        let xyz_play_translation;
+        if xyz_play_result[plays[1]] == "tie" {
+            player_abc_score += TIE_VALUE;
+            player_xyz_score += TIE_VALUE;
+            xyz_play_translation = plays[0];
+        } else if xyz_play_result[plays[1]] == "lose" {
+            player_abc_score += WIN_VALUE;
+            player_xyz_score += LOSS_VALUE;
+            xyz_play_translation = xyz_loses[plays[0]];
+        } else {
+            player_abc_score += LOSS_VALUE;
+            player_xyz_score += WIN_VALUE;
+            xyz_play_translation = xyz_wins[plays[0]];
         }
-        if current_sum > max_sum {
-            max_sum = current_sum
-        }
+        println!("{}", xyz_play_translation);
+        player_xyz_score += play_value[xyz_play_translation];
     }
-    return max_sum;
-}
-
-pub fn find_sum_of_largest_n_sums(two_dim_vec: Vec<Vec<i32>>, n_groups: &i32) -> i32 {
-    let mut group_sums = Vec::new();
-    println!("{}", two_dim_vec.len());
-    for inner_list in two_dim_vec.iter() {
-        let mut current_sum = 0;
-        for number in inner_list.iter() {
-            current_sum += number;
-        }
-        group_sums.push(current_sum);
-    }
-    if (group_sums.len() as i32) < *n_groups {
-        return group_sums.iter().sum();
-    }
-    println!("{:?}", &group_sums[240..267]);
-    group_sums.sort();
-    let start_idx = (group_sums.len() as i32) - *n_groups;
-    let mut sum_of_sums = 0;
-    let mut current_idx = start_idx as usize;
-    println!("{:?}", &group_sums[240..267]);
-    while current_idx < (group_sums.len()) {
-        sum_of_sums += group_sums[current_idx];
-        current_idx += 1;
-    }
-
-    return sum_of_sums;
+    println!(
+        "Player ABC {} : Player XYZ {}",
+        player_abc_score, player_xyz_score
+    )
 }
 
 pub struct Config {
